@@ -1,0 +1,138 @@
+{\rtf1\ansi\uc0\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}
+{\colortbl;
+\red231\green233\blue219;
+\red239\green97\blue85;
+\red119\green110\blue113;
+\red129\green91\blue164;
+\red91\green196\blue191;
+\red254\green196\blue24;
+\red6\green182\blue239;
+\red249\green155\blue21;
+\red72\green182\blue133;
+}
+\f0\sa0
+\dntblnsbdb
+{\cf3 # %% [markdown]}{\cf1 \par}
+{\cf3 # As adapted from [SHAP](https://shap.readthedocs.io/en/latest/example_notebooks/tabular_examples/tree_based_models/Census%20income%20classification%20with%20LightGBM.html)}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 lightgbm}{\cf1  }{\cf4 as}{\cf1  }{\cf6 lgb}{\cf1 \par}
+{\cf5 from}{\cf1  }{\cf6 sklearn}{\cf6 .}{\cf6 model_selection}{\cf1  }{\cf5 import}{\cf1  }{\cf1 train_test_split}{\cf1 \par}
+{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 shap}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # print the JS visualization code to the notebook}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 initjs}{\cf1 (}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf5 from}{\cf1  }{\cf6 IPython}{\cf6 .}{\cf6 display}{\cf1  }{\cf5 import}{\cf1  }{\cf1 HTML}{\cf1 \par}
+{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 graphviz}{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 seaborn}{\cf1  }{\cf4 as}{\cf1  }{\cf6 sns}{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 pandas}{\cf1  }{\cf4 as}{\cf1  }{\cf6 pd}{\cf1 \par}
+{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 X}{\cf1 ,}{\cf1  }{\cf1 y}{\cf1  }{\cf5 =}{\cf1  }{\cf1 shap}{\cf5 .}{\cf1 datasets}{\cf5 .}{\cf1 adult}{\cf1 (}{\cf1 )}{\cf1 \par}
+{\cf1 X_display}{\cf1 ,}{\cf1  }{\cf1 y_display}{\cf1  }{\cf5 =}{\cf1  }{\cf1 shap}{\cf5 .}{\cf1 datasets}{\cf5 .}{\cf1 adult}{\cf1 (}{\cf1 display}{\cf5 =}{\cf4 True}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # create a train/test split}{\cf1 \par}
+{\cf1 X_train}{\cf1 ,}{\cf1  }{\cf1 X_test}{\cf1 ,}{\cf1  }{\cf1 y_train}{\cf1 ,}{\cf1  }{\cf1 y_test}{\cf1  }{\cf5 =}{\cf1  }{\cf1 train_test_split}{\cf1 (}{\cf1 X}{\cf1 ,}{\cf1  }{\cf1 y}{\cf1 ,}{\cf1  }{\cf1 test_size}{\cf5 =}{\cf8 0.2}{\cf1 ,}{\cf1  }{\cf1 random_state}{\cf5 =}{\cf8 7}{\cf1 )}{\cf1 \par}
+{\cf1 d_train}{\cf1  }{\cf5 =}{\cf1  }{\cf1 lgb}{\cf5 .}{\cf1 Dataset}{\cf1 (}{\cf1 X_train}{\cf1 ,}{\cf1  }{\cf1 label}{\cf5 =}{\cf1 y_train}{\cf1 )}{\cf1 \par}
+{\cf1 d_test}{\cf1  }{\cf5 =}{\cf1  }{\cf1 lgb}{\cf5 .}{\cf1 Dataset}{\cf1 (}{\cf1 X_test}{\cf1 ,}{\cf1  }{\cf1 label}{\cf5 =}{\cf1 y_test}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 y}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 corr_matrix}{\cf1  }{\cf5 =}{\cf1  }{\cf1 pd}{\cf5 .}{\cf1 DataFrame}{\cf1 (}{\cf1 X}{\cf1 )}{\cf5 .}{\cf1 corr}{\cf1 (}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf1 sns}{\cf5 .}{\cf1 heatmap}{\cf1 (}{\cf1 corr_matrix}{\cf1 ,}{\cf1  }{\cf1 cmap}{\cf5 =}{\cf9 "}{\cf9 coolwarm}{\cf9 "}{\cf1 ,}{\cf1  }{\cf1 center}{\cf5 =}{\cf8 0}{\cf1 ,}{\cf1  }{\cf1 annot}{\cf5 =}{\cf4 True}{\cf1 ,}{\cf1  }{\cf1 fmt}{\cf5 =}{\cf9 "}{\cf9 .1f}{\cf9 "}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 params}{\cf1  }{\cf5 =}{\cf1  }{\cf1 \{}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 max_bin}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 512}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 learning_rate}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 0.05}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 boosting_type}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 gbdt}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 objective}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 binary}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 metric}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 binary_logloss}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 num_leaves}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 10}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 verbose}{\cf9 "}{\cf1 :}{\cf1  }{\cf5 -}{\cf8 1}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 min_data}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 100}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 boost_from_average}{\cf9 "}{\cf1 :}{\cf1  }{\cf4 True}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 early_stopping_round}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 50}{\cf1 ,}{\cf1 \par}
+{\cf1 \}}{\cf1 \par}
+{\cf1 \par}
+{\cf1 model}{\cf1  }{\cf5 =}{\cf1  }{\cf1 lgb}{\cf5 .}{\cf1 train}{\cf1 (}{\cf1 \par}
+{\cf1     }{\cf1 params}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf1 d_train}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf8 10000}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf1 valid_sets}{\cf5 =}{\cf1 [}{\cf1 d_test}{\cf1 ]}{\cf1 ,}{\cf1 \par}
+{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 lgb}{\cf5 .}{\cf1 create_tree_digraph}{\cf1 (}{\cf1 model}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 params_100}{\cf1  }{\cf5 =}{\cf1  }{\cf1 \{}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 max_bin}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 512}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 learning_rate}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 0.05}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 boosting_type}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 gbdt}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 objective}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 binary}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 metric}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 binary_logloss}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 num_leaves}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 100}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 verbose}{\cf9 "}{\cf1 :}{\cf1  }{\cf5 -}{\cf8 1}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 min_data}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 100}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 boost_from_average}{\cf9 "}{\cf1 :}{\cf1  }{\cf4 True}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 early_stopping_round}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 50}{\cf1 ,}{\cf1 \par}
+{\cf1 \}}{\cf1 \par}
+{\cf1 \par}
+{\cf1 model_100}{\cf1  }{\cf5 =}{\cf1  }{\cf1 lgb}{\cf5 .}{\cf1 train}{\cf1 (}{\cf1 \par}
+{\cf1     }{\cf1 params}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf1 d_train}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf8 10000}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf1 valid_sets}{\cf5 =}{\cf1 [}{\cf1 d_test}{\cf1 ]}{\cf1 ,}{\cf1 \par}
+{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 lgb}{\cf5 .}{\cf1 create_tree_digraph}{\cf1 (}{\cf1 model_100}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 params_1000}{\cf1  }{\cf5 =}{\cf1  }{\cf1 \{}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 max_bin}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 512}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 learning_rate}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 0.05}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 boosting_type}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 gbdt}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 objective}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 binary}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 metric}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 binary_logloss}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 num_leaves}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 1000}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 verbose}{\cf9 "}{\cf1 :}{\cf1  }{\cf5 -}{\cf8 1}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 min_data}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 100}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 boost_from_average}{\cf9 "}{\cf1 :}{\cf1  }{\cf4 True}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 early_stopping_round}{\cf9 "}{\cf1 :}{\cf1  }{\cf8 50}{\cf1 ,}{\cf1 \par}
+{\cf1 \}}{\cf1 \par}
+{\cf1 \par}
+{\cf1 model_1000}{\cf1  }{\cf5 =}{\cf1  }{\cf1 lgb}{\cf5 .}{\cf1 train}{\cf1 (}{\cf1 \par}
+{\cf1     }{\cf1 params}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf1 d_train}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf8 10000}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf1 valid_sets}{\cf5 =}{\cf1 [}{\cf1 d_test}{\cf1 ]}{\cf1 ,}{\cf1 \par}
+{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 lgb}{\cf5 .}{\cf1 create_tree_digraph}{\cf1 (}{\cf1 model_1000}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 explainer}{\cf1  }{\cf5 =}{\cf1  }{\cf1 shap}{\cf5 .}{\cf1 TreeExplainer}{\cf1 (}{\cf1 model}{\cf1 )}{\cf1 \par}
+{\cf1 shap_values}{\cf1  }{\cf5 =}{\cf1  }{\cf1 explainer}{\cf1 (}{\cf1 X}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 force_plot}{\cf1 (}{\cf1 shap_values}{\cf1 [}{\cf8 0}{\cf1 ]}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 force_plot}{\cf1 (}{\cf1 shap_values}{\cf1 [}{\cf8 10}{\cf1 ]}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 plots}{\cf5 .}{\cf1 force}{\cf1 (}{\cf1 shap_values}{\cf1 [}{\cf8 0}{\cf1 :}{\cf8 100}{\cf1 ]}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 plots}{\cf5 .}{\cf1 bar}{\cf1 (}{\cf1 shap_values}{\cf1 )}{\cf1 \par}
+}
