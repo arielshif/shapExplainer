@@ -1,0 +1,130 @@
+{\rtf1\ansi\uc0\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}
+{\colortbl;
+\red231\green233\blue219;
+\red239\green97\blue85;
+\red119\green110\blue113;
+\red129\green91\blue164;
+\red91\green196\blue191;
+\red254\green196\blue24;
+\red6\green182\blue239;
+\red249\green155\blue21;
+\red72\green182\blue133;
+}
+\f0\sa0
+\dntblnsbdb
+{\cf3 # %%}{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 pandas}{\cf1  }{\cf4 as}{\cf1  }{\cf6 pd}{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 numpy}{\cf1  }{\cf4 as}{\cf1  }{\cf6 np}{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 matplotlib}{\cf6 .}{\cf6 pyplot}{\cf1  }{\cf4 as}{\cf1  }{\cf6 plt}{\cf1 \par}
+{\cf5 %}{\cf1 matplotlib}{\cf1  }{\cf1 inline}{\cf1 \par}
+{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 xgboost}{\cf1  }{\cf4 as}{\cf1  }{\cf6 xgb}{\cf1 \par}
+{\cf5 from}{\cf1  }{\cf6 sklearn}{\cf6 .}{\cf6 metrics}{\cf1  }{\cf5 import}{\cf1  }{\cf1 accuracy_score}{\cf1 ,}{\cf1 confusion_matrix}{\cf1 \par}
+{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 seaborn}{\cf1  }{\cf4 as}{\cf1  }{\cf6 sns}{\cf1 \par}
+{\cf1 \par}
+{\cf5 import}{\cf1  }{\cf6 shap}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 initjs}{\cf1 (}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf5 from}{\cf1  }{\cf6 sklearn}{\cf6 .}{\cf6 preprocessing}{\cf1  }{\cf5 import}{\cf1  }{\cf1 OneHotEncoder}{\cf1 \par}
+{\cf5 from}{\cf1  }{\cf6 sklearn}{\cf6 .}{\cf6 linear_model}{\cf1  }{\cf5 import}{\cf1  }{\cf1 LinearRegression}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 data}{\cf1  }{\cf5 =}{\cf1  }{\cf1 pd}{\cf5 .}{\cf1 read_csv}{\cf1 (}{\cf9 "}{\cf9 abalone.data}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1                   }{\cf1 names}{\cf5 =}{\cf1 [}{\cf9 "}{\cf9 sex}{\cf9 "}{\cf1 ,}{\cf9 "}{\cf9 length}{\cf9 "}{\cf1 ,}{\cf9 "}{\cf9 diameter}{\cf9 "}{\cf1 ,}{\cf9 "}{\cf9 height}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1                          }{\cf9 "}{\cf9 whole weight}{\cf9 "}{\cf1 ,}{\cf9 "}{\cf9 shucked weight}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1                          }{\cf9 "}{\cf9 viscera weight}{\cf9 "}{\cf1 ,}{\cf9 "}{\cf9 shell weight}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1                          }{\cf9 "}{\cf9 rings}{\cf9 "}{\cf1 ]}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf1 data}{\cf5 .}{\cf1 head}{\cf1 (}{\cf1 )}{\cf1                       }{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 cont}{\cf1  }{\cf5 =}{\cf1  }{\cf1 [}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 length}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 diameter}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 height}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 whole weight}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 shucked weight}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 viscera weight}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 shell weight}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1     }{\cf9 "}{\cf9 rings}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1 ]}{\cf1 \par}
+{\cf1 corr_matrix}{\cf1  }{\cf5 =}{\cf1  }{\cf1 pd}{\cf5 .}{\cf1 DataFrame}{\cf1 (}{\cf1 data}{\cf1 [}{\cf1 cont}{\cf1 ]}{\cf1 ,}{\cf1  }{\cf1 columns}{\cf5 =}{\cf1 cont}{\cf1 )}{\cf5 .}{\cf1 corr}{\cf1 (}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf1 sns}{\cf5 .}{\cf1 heatmap}{\cf1 (}{\cf1 corr_matrix}{\cf1 ,}{\cf1  }{\cf1 cmap}{\cf5 =}{\cf9 "}{\cf9 coolwarm}{\cf9 "}{\cf1 ,}{\cf1  }{\cf1 center}{\cf5 =}{\cf8 0}{\cf1 ,}{\cf1  }{\cf1 annot}{\cf5 =}{\cf4 True}{\cf1 ,}{\cf1  }{\cf1 fmt}{\cf5 =}{\cf9 "}{\cf9 .1g}{\cf9 "}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 ax}{\cf1  }{\cf5 =}{\cf1  }{\cf1 sns}{\cf5 .}{\cf1 heatmap}{\cf1 (}{\cf1 corr_matrix}{\cf1 ,}{\cf1  }{\cf1 cmap}{\cf5 =}{\cf9 "}{\cf9 coolwarm}{\cf9 "}{\cf1 ,}{\cf1  }{\cf1 center}{\cf5 =}{\cf8 0}{\cf1 ,}{\cf1  }{\cf1 annot}{\cf5 =}{\cf4 True}{\cf1 ,}{\cf1  }{\cf1 fmt}{\cf5 =}{\cf9 "}{\cf9 .1g}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1                  }{\cf1 annot_kws}{\cf5 =}{\cf1 \{}{\cf9 "}{\cf9 color}{\cf9 "}{\cf1 :}{\cf1  }{\cf9 "}{\cf9 white}{\cf9 "}{\cf1 \}}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # Set the color of the x and y axis labels to white}{\cf1 \par}
+{\cf1 ax}{\cf5 .}{\cf1 set_xlabel}{\cf1 (}{\cf1 ax}{\cf5 .}{\cf1 get_xlabel}{\cf1 (}{\cf1 )}{\cf1 ,}{\cf1  }{\cf1 color}{\cf5 =}{\cf9 '}{\cf9 white}{\cf9 '}{\cf1 )}{\cf1 \par}
+{\cf1 ax}{\cf5 .}{\cf1 set_ylabel}{\cf1 (}{\cf1 ax}{\cf5 .}{\cf1 get_ylabel}{\cf1 (}{\cf1 )}{\cf1 ,}{\cf1  }{\cf1 color}{\cf5 =}{\cf9 '}{\cf9 white}{\cf9 '}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # Set the color of the x and y ticks to white}{\cf1 \par}
+{\cf1 ax}{\cf5 .}{\cf1 tick_params}{\cf1 (}{\cf1 axis}{\cf5 =}{\cf9 '}{\cf9 x}{\cf9 '}{\cf1 ,}{\cf1  }{\cf1 colors}{\cf5 =}{\cf9 '}{\cf9 white}{\cf9 '}{\cf1 )}{\cf1 \par}
+{\cf1 ax}{\cf5 .}{\cf1 tick_params}{\cf1 (}{\cf1 axis}{\cf5 =}{\cf9 '}{\cf9 y}{\cf9 '}{\cf1 ,}{\cf1  }{\cf1 colors}{\cf5 =}{\cf9 '}{\cf9 white}{\cf9 '}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf1 ax}{\cf5 .}{\cf1 set_rasterized}{\cf1 (}{\cf1 rasterized}{\cf5 =}{\cf4 False}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 plt}{\cf5 .}{\cf1 savefig}{\cf1 (}{\cf9 "}{\cf9 corrs.svg}{\cf9 "}{\cf1 ,}{\cf1  }{\cf1 format}{\cf5 =}{\cf9 "}{\cf9 svg}{\cf9 "}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 categorical_columns}{\cf1  }{\cf5 =}{\cf1  }{\cf1 data}{\cf5 .}{\cf1 select_dtypes}{\cf1 (}{\cf1 include}{\cf5 =}{\cf1 [}{\cf9 '}{\cf9 object}{\cf9 '}{\cf1 ]}{\cf1 )}{\cf5 .}{\cf1 columns}{\cf5 .}{\cf1 tolist}{\cf1 (}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 #Initialize OneHotEncoder}{\cf1 \par}
+{\cf1 encoder}{\cf1  }{\cf5 =}{\cf1  }{\cf1 OneHotEncoder}{\cf1 (}{\cf1 sparse_output}{\cf5 =}{\cf4 False}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # Apply one-hot encoding to the categorical columns}{\cf1 \par}
+{\cf1 one_hot_encoded}{\cf1  }{\cf5 =}{\cf1  }{\cf1 encoder}{\cf5 .}{\cf1 fit_transform}{\cf1 (}{\cf1 data}{\cf1 [}{\cf1 categorical_columns}{\cf1 ]}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 #Create a DataFrame with the one-hot encoded columns}{\cf1 \par}
+{\cf3 #We use get_feature_names_out() to get the column names for the encoded data}{\cf1 \par}
+{\cf1 one_hot_df}{\cf1  }{\cf5 =}{\cf1  }{\cf1 pd}{\cf5 .}{\cf1 DataFrame}{\cf1 (}{\cf1 one_hot_encoded}{\cf1 ,}{\cf1  }{\cf1 columns}{\cf5 =}{\cf1 encoder}{\cf5 .}{\cf1 get_feature_names_out}{\cf1 (}{\cf1 categorical_columns}{\cf1 )}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # Concatenate the one-hot encoded dataframe with the original dataframe}{\cf1 \par}
+{\cf1 df_encoded}{\cf1  }{\cf5 =}{\cf1  }{\cf1 pd}{\cf5 .}{\cf1 concat}{\cf1 (}{\cf1 [}{\cf1 data}{\cf1 ,}{\cf1  }{\cf1 one_hot_df}{\cf1 ]}{\cf1 ,}{\cf1  }{\cf1 axis}{\cf5 =}{\cf8 1}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # Drop the original categorical columns}{\cf1 \par}
+{\cf1 df_encoded}{\cf1  }{\cf5 =}{\cf1  }{\cf1 df_encoded}{\cf5 .}{\cf1 drop}{\cf1 (}{\cf1 categorical_columns}{\cf1 ,}{\cf1  }{\cf1 axis}{\cf5 =}{\cf8 1}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 #Get features}{\cf1 \par}
+{\cf1 y}{\cf1  }{\cf5 =}{\cf1  }{\cf1 df_encoded}{\cf1 [}{\cf9 '}{\cf9 rings}{\cf9 '}{\cf1 ]}{\cf1 \par}
+{\cf1 X}{\cf1  }{\cf5 =}{\cf1  }{\cf1 df_encoded}{\cf1 [}{\cf1 [}{\cf9 "}{\cf9 sex_F}{\cf9 "}{\cf1 ,}{\cf1  }{\cf9 "}{\cf9 sex_I}{\cf9 "}{\cf1 ,}{\cf1  }{\cf9 "}{\cf9 sex_M}{\cf9 "}{\cf1 ,}{\cf1  }{\cf9 "}{\cf9 length}{\cf9 "}{\cf1 ,}{\cf9 "}{\cf9 height}{\cf9 "}{\cf1 ,}{\cf1 \par}
+{\cf1           }{\cf9 "}{\cf9 shucked weight}{\cf9 "}{\cf1 ,}{\cf9 "}{\cf9 viscera weight}{\cf9 "}{\cf1 ,}{\cf9 "}{\cf9 shell weight}{\cf9 "}{\cf1 ]}{\cf1 ]}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 model}{\cf1  }{\cf5 =}{\cf1  }{\cf1 xgb}{\cf5 .}{\cf1 XGBRegressor}{\cf1 (}{\cf1 objective}{\cf5 =}{\cf9 "}{\cf9 reg:squarederror}{\cf9 "}{\cf1 )}{\cf1  }{\cf1 \par}
+{\cf1 model}{\cf5 .}{\cf1 fit}{\cf1 (}{\cf1 X}{\cf1 ,}{\cf1  }{\cf1 y}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 y_pred}{\cf1  }{\cf5 =}{\cf1  }{\cf1 model}{\cf5 .}{\cf1 predict}{\cf1 (}{\cf1 X}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # model evaluation}{\cf1 \par}
+{\cf1 plt}{\cf5 .}{\cf1 figure}{\cf1 (}{\cf1 figsize}{\cf5 =}{\cf1 (}{\cf8 5}{\cf1 ,}{\cf1  }{\cf8 5}{\cf1 )}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf1 plt}{\cf5 .}{\cf1 scatter}{\cf1 (}{\cf1 y}{\cf1 ,}{\cf1  }{\cf1 y_pred}{\cf1 )}{\cf1 \par}
+{\cf1 plt}{\cf5 .}{\cf1 plot}{\cf1 (}{\cf1 [}{\cf8 0}{\cf1 ,}{\cf1  }{\cf8 30}{\cf1 ]}{\cf1 ,}{\cf1  }{\cf1 [}{\cf8 0}{\cf1 ,}{\cf1  }{\cf8 30}{\cf1 ]}{\cf1 ,}{\cf1  }{\cf1 color}{\cf5 =}{\cf9 "}{\cf9 r}{\cf9 "}{\cf1 ,}{\cf1  }{\cf1 linestyle}{\cf5 =}{\cf9 "}{\cf9 -}{\cf9 "}{\cf1 ,}{\cf1  }{\cf1 linewidth}{\cf5 =}{\cf8 2}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf1 plt}{\cf5 .}{\cf1 ylabel}{\cf1 (}{\cf9 "}{\cf9 Predicted}{\cf9 "}{\cf1 ,}{\cf1  }{\cf1 size}{\cf5 =}{\cf8 20}{\cf1 )}{\cf1 \par}
+{\cf1 plt}{\cf5 .}{\cf1 xlabel}{\cf1 (}{\cf9 "}{\cf9 Actual}{\cf9 "}{\cf1 ,}{\cf1  }{\cf1 size}{\cf5 =}{\cf8 20}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 explainer}{\cf1  }{\cf5 =}{\cf1  }{\cf1 shap}{\cf5 .}{\cf1 Explainer}{\cf1 (}{\cf1 model}{\cf1 )}{\cf1 \par}
+{\cf1 shap_values}{\cf1  }{\cf5 =}{\cf1  }{\cf1 explainer}{\cf1 (}{\cf1 X}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 plots}{\cf5 .}{\cf1 waterfall}{\cf1 (}{\cf1 shap_values}{\cf1 [}{\cf8 0}{\cf1 ]}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 plots}{\cf5 .}{\cf1 force}{\cf1 (}{\cf1 shap_values}{\cf1 [}{\cf8 0}{\cf1 ]}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 plots}{\cf5 .}{\cf1 force}{\cf1 (}{\cf1 shap_values}{\cf1 [}{\cf8 0}{\cf1 :}{\cf8 100}{\cf1 ]}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+{\cf1 shap}{\cf5 .}{\cf1 plots}{\cf5 .}{\cf1 bar}{\cf1 (}{\cf1 shap_values}{\cf1 )}{\cf1 \par}
+{\cf1 \par}
+{\cf3 # %%}{\cf1 \par}
+}
